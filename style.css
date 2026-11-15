@@ -1,0 +1,151 @@
+/* --- ПЕРЕМЕННЫЕ ЦВЕТОВ (СВЕТЛАЯ ТЕМА) --- */
+:root {
+    --bg: #E8F4F8; --card-bg: #FFFFFF; --text: #111111; --text-muted: #557;
+    --border: #111111; --accent: #00B4D8; --ring-bg: #d1e8ef;
+    --glass-bg: #F0F8FF; --glass-border: #B0C4DE; --modal-bg: rgba(232, 244, 248, 0.9);
+    --shadow: 10px 10px 0px rgba(17, 17, 17, 0.1);
+}
+
+/* --- ПЕРЕМЕННЫЕ ЦВЕТОВ (ТЕМНАЯ ТЕМА) --- */
+[data-theme="dark"] {
+    --bg: #0a0a0a; --card-bg: #141414; --text: #e0e0e0; --text-muted: #888;
+    --border: #333; --accent: #E63946; --ring-bg: #222;
+    --glass-bg: #1a1a1a; --glass-border: #333; --modal-bg: rgba(10, 10, 10, 0.9);
+    --shadow: 10px 10px 0px rgba(179, 0, 0, 0.1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--bg); color: var(--text);
+    font-family: 'Montserrat', sans-serif; min-height: 100vh;
+    display: flex; justify-content: center; align-items: center; padding: 20px;
+    overflow-x: hidden; transition: background-color 0.4s, color 0.4s;
+}
+
+.app-container {
+    background: var(--card-bg); border: 2px solid var(--border); border-radius: 20px;
+    padding: 40px 30px; max-width: 400px; width: 100%;
+    text-align: center; box-shadow: var(--shadow); position: relative; z-index: 1;
+    transition: all 0.4s;
+}
+
+header { margin-bottom: 30px; }
+header h1 { font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: var(--text); }
+.subtitle { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+
+/* Круг */
+.progress-container { position: relative; display: inline-flex; justify-content: center; align-items: center; margin-bottom: 30px; }
+.progress-ring { transform: rotate(-90deg); }
+.progress-ring__circle { transition: stroke-dashoffset 0.5s ease-in-out; }
+.progress-ring__circle--fill { stroke-dasharray: 553; stroke-dashoffset: 553; stroke-linecap: round; }
+.progress-text { position: absolute; display: flex; flex-direction: column; align-items: center; }
+#current-amount { font-size: 48px; font-weight: 900; line-height: 1; color: var(--text); }
+.unit { font-size: 16px; font-weight: 700; color: var(--accent); }
+.goal-text { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+
+/* Кнопки */
+.controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+.water-btn {
+    background: var(--card-bg); border: 2px solid var(--border); color: var(--text);
+    padding: 10px 15px; font-family: 'Montserrat', sans-serif;
+    font-weight: 700; border-radius: 50px; cursor: pointer; transition: all 0.2s ease;
+}
+.water-btn:hover { background: var(--accent); color: #FFF; border-color: var(--accent); transform: translateY(-2px); }
+
+.custom-input-row { display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 15px; }
+.custom-input {
+    width: 130px; padding: 8px 10px; background: var(--card-bg); border: 2px solid var(--border);
+    border-radius: 50px; font-family: 'Montserrat', sans-serif; font-size: 12px;
+    color: var(--text); outline: none; text-align: center; transition: border-color 0.2s;
+}
+.custom-input::-webkit-outer-spin-button,
+.custom-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.custom-input:focus { border-color: var(--accent); }
+
+.action-row { display: flex; justify-content: space-between; margin-bottom: 25px; }
+.action-btn {
+    background: transparent; border: none; color: var(--text-muted);
+    font-family: 'Montserrat', sans-serif; font-size: 11px;
+    cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.2s;
+}
+.action-btn:hover { color: var(--accent); }
+.action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Факты */
+.fact-card { border-top: 2px dashed var(--glass-border); padding-top: 20px; text-align: left; }
+.fact-card h3 { font-size: 12px; letter-spacing: 1px; margin-bottom: 10px; color: var(--accent); }
+#fact-text { font-size: 13px; line-height: 1.5; margin-bottom: 15px; color: var(--text); }
+.fact-btn { background: transparent; border: none; color: var(--text); font-weight: 700; text-decoration: underline; cursor: pointer; font-size: 12px; text-transform: uppercase; }
+
+.bottom-actions { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--glass-border); }
+.reset-text { color: #E63946; }
+.reset-text:hover { color: #ff0000; }
+
+/* --- БОКОВЫЕ ПАНЕЛИ --- */
+.side-panel {
+    position: fixed; top: 20px; bottom: 20px; width: 340px;
+    max-width: calc(100vw - 40px);
+    background: var(--card-bg); border: 2px solid var(--border); border-radius: 20px;
+    box-shadow: var(--shadow); padding: 25px 20px; z-index: 100;
+    display: flex; flex-direction: column;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#info-panel { left: 20px; transform: translateX(-150%); }
+#info-panel.show { transform: translateX(0); }
+#history-panel { right: 20px; transform: translateX(150%); }
+#history-panel.show { transform: translateX(0); }
+
+.panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 10px; flex-shrink: 0; }
+.panel-header h2 { font-size: 18px; font-weight: 900; text-transform: uppercase; }
+.close-panel { background: transparent; border: none; font-size: 20px; cursor: pointer; color: var(--text); }
+
+/* Текст в "О нормах" */
+.panel-content { overflow-y: auto; font-size: 13px; line-height: 1.5; text-align: left; color: var(--text); padding-right: 5px; flex: 1; }
+.panel-content h3 { font-size: 13px; color: var(--accent); margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+.panel-content h3:first-child { margin-top: 0; }
+.panel-content ul { padding-left: 20px; margin-bottom: 10px; }
+.panel-content li { margin-bottom: 5px; }
+.panel-content::-webkit-scrollbar { width: 4px; }
+.panel-content::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+/* Контейнеры для Календаря и Журнала */
+.view-section { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-right: 5px; }
+.view-section::-webkit-scrollbar { width: 4px; }
+.view-section::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+/* Календарь */
+.calendar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.calendar-day { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 5px; padding: 8px 4px; text-align: center; cursor: pointer; transition: all 0.2s; font-size: 12px; color: var(--text); }
+.calendar-day:hover { border-color: var(--accent); }
+.calendar-day.active { background: var(--accent); color: white; border-color: var(--accent); }
+.calendar-day.today { border: 2px solid var(--text); font-weight: bold; }
+.day-glass { width: 16px; height: 20px; border: 1px solid var(--text); border-top: none; margin: 5px auto 0; border-radius: 0 0 3px 3px; position: relative; overflow: hidden; }
+.day-glass-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent); transition: height 0.3s; }
+
+/* Журнал */
+.daily-journal { list-style: none; font-size: 12px; color: var(--text); }
+.daily-journal li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--glass-border); }
+
+/* Кнопка переключения видов */
+.toggle-view-btn {
+    background: var(--accent); color: white; border: 2px solid var(--accent);
+    padding: 10px; border-radius: 10px; font-family: 'Montserrat', sans-serif;
+    font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase;
+    transition: all 0.2s; margin-top: 15px; flex-shrink: 0;
+}
+.toggle-view-btn:hover { background: var(--card-bg); color: var(--accent); }
+
+/* Модалки */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+.modal-overlay.show { display: flex; }
+.modal-content { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 25px; max-width: 350px; width: 90%; text-align: center; box-shadow: var(--shadow); max-height: 80vh; display: flex; flex-direction: column; }
+.modal-content h2 { color: #E63946; margin-bottom: 10px; font-weight: 900; font-size: 18px; }
+#modal-text { overflow-y: auto; padding-right: 5px; margin-bottom: 15px; color: var(--text); }
+
+/* Стиль для заблокированных дней в календаре */
+.calendar-day.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none; /* Запрещает любые клики */
+}
