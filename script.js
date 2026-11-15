@@ -49,8 +49,8 @@ async function fetchHistoryFromServer() {
 function addWater(amount) {
     const now = new Date();
     const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    const dateString = now.toISOString().split('T')[0];
-
+    const dateString = getToday(); // <--- ИСПОЛЬЗУЕМ ЛОКАЛЬНУЮ ДАТУ
+    
     fetch('/api/water', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
