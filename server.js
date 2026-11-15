@@ -152,3 +152,4 @@ app.listen(PORT, () => {
   console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
   console.log(`📂 Статика раздается из: ${path.join(__dirname, '../public')}`);
 });
+
