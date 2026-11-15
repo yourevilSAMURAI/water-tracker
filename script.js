@@ -9,6 +9,13 @@ let db = {}; // Локальная копия данных с сервера
 // Получение ID пользователя (Telegram или тестовый для браузера)
 const tg = window.Telegram?.WebApp;
 const currentUserId = (tg?.initDataUnsafe?.user) ? tg.initDataUnsafe.user.id : 1;
+
+// Инициализация Telegram WebApp
+if (tg) {
+    tg.ready();
+    tg.expand();
+}
+
 console.log(`ID пользователя: ${currentUserId} (${tg?.initDataUnsafe?.user ? 'Telegram' : 'Браузер'})`);
 
 // Управление датами
