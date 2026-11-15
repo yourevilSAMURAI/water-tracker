@@ -1,4 +1,6 @@
-/* --- ПЕРЕМЕННЫЕ ЦВЕТОВ (СВЕТЛАЯ ТЕМА) --- */
+/* ==========================================================================
+   1. ПЕРЕМЕННЫЕ ЦВЕТОВ (ТЕМЫ)
+   ========================================================================== */
 :root {
     --bg: #E8F4F8; --card-bg: #FFFFFF; --text: #111111; --text-muted: #557;
     --border: #111111; --accent: #00B4D8; --ring-bg: #d1e8ef;
@@ -6,7 +8,6 @@
     --shadow: 10px 10px 0px rgba(17, 17, 17, 0.1);
 }
 
-/* --- ПЕРЕМЕННЫЕ ЦВЕТОВ (ТЕМНАЯ ТЕМА) --- */
 [data-theme="dark"] {
     --bg: #0a0a0a; --card-bg: #141414; --text: #e0e0e0; --text-muted: #888;
     --border: #333; --accent: #E63946; --ring-bg: #222;
@@ -14,6 +15,9 @@
     --shadow: 10px 10px 0px rgba(179, 0, 0, 0.1);
 }
 
+/* ==========================================================================
+   2. БАЗОВЫЕ СТИЛИ
+   ========================================================================== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -34,7 +38,9 @@ header { margin-bottom: 30px; }
 header h1 { font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: var(--text); }
 .subtitle { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
 
-/* Круг */
+/* ==========================================================================
+   3. ГЛАВНЫЙ ЭКРАН (Круг, Кнопки, Факты)
+   ========================================================================== */
 .progress-container { position: relative; display: inline-flex; justify-content: center; align-items: center; margin-bottom: 30px; }
 .progress-ring { transform: rotate(-90deg); }
 .progress-ring__circle { transition: stroke-dashoffset 0.5s ease-in-out; }
@@ -44,7 +50,6 @@ header h1 { font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: va
 .unit { font-size: 16px; font-weight: 700; color: var(--accent); }
 .goal-text { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
 
-/* Кнопки */
 .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
 .water-btn {
     background: var(--card-bg); border: 2px solid var(--border); color: var(--text);
@@ -72,7 +77,6 @@ header h1 { font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: va
 .action-btn:hover { color: var(--accent); }
 .action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-/* Факты */
 .fact-card { border-top: 2px dashed var(--glass-border); padding-top: 20px; text-align: left; }
 .fact-card h3 { font-size: 12px; letter-spacing: 1px; margin-bottom: 10px; color: var(--accent); }
 #fact-text { font-size: 13px; line-height: 1.5; margin-bottom: 15px; color: var(--text); }
@@ -82,7 +86,9 @@ header h1 { font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: va
 .reset-text { color: #E63946; }
 .reset-text:hover { color: #ff0000; }
 
-/* --- БОКОВЫЕ ПАНЕЛИ --- */
+/* ==========================================================================
+   4. БОКОВЫЕ ПАНЕЛИ (Нормы и Прогресс)
+   ========================================================================== */
 .side-panel {
     position: fixed; top: 20px; bottom: 20px; width: 340px;
     max-width: calc(100vw - 40px);
@@ -100,7 +106,6 @@ header h1 { font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: va
 .panel-header h2 { font-size: 18px; font-weight: 900; text-transform: uppercase; }
 .close-panel { background: transparent; border: none; font-size: 20px; cursor: pointer; color: var(--text); }
 
-/* Текст в "О нормах" */
 .panel-content { overflow-y: auto; font-size: 13px; line-height: 1.5; text-align: left; color: var(--text); padding-right: 5px; flex: 1; }
 .panel-content h3 { font-size: 13px; color: var(--accent); margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
 .panel-content h3:first-child { margin-top: 0; }
@@ -109,7 +114,6 @@ header h1 { font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: va
 .panel-content::-webkit-scrollbar { width: 4px; }
 .panel-content::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
 
-/* Контейнеры для Календаря и Журнала */
 .view-section { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-right: 5px; }
 .view-section::-webkit-scrollbar { width: 4px; }
 .view-section::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
@@ -120,6 +124,7 @@ header h1 { font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: va
 .calendar-day:hover { border-color: var(--accent); }
 .calendar-day.active { background: var(--accent); color: white; border-color: var(--accent); }
 .calendar-day.today { border: 2px solid var(--text); font-weight: bold; }
+.calendar-day.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 .day-glass { width: 16px; height: 20px; border: 1px solid var(--text); border-top: none; margin: 5px auto 0; border-radius: 0 0 3px 3px; position: relative; overflow: hidden; }
 .day-glass-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent); transition: height 0.3s; }
 
@@ -136,16 +141,11 @@ header h1 { font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: va
 }
 .toggle-view-btn:hover { background: var(--card-bg); color: var(--accent); }
 
-/* Модалки */
+/* ==========================================================================
+   5. МОДАЛЬНЫЕ ОКНА
+   ========================================================================== */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
 .modal-overlay.show { display: flex; }
 .modal-content { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 25px; max-width: 350px; width: 90%; text-align: center; box-shadow: var(--shadow); max-height: 80vh; display: flex; flex-direction: column; }
 .modal-content h2 { color: #E63946; margin-bottom: 10px; font-weight: 900; font-size: 18px; }
 #modal-text { overflow-y: auto; padding-right: 5px; margin-bottom: 15px; color: var(--text); }
-
-/* Стиль для заблокированных дней в календаре */
-.calendar-day.disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    pointer-events: none; /* Запрещает любые клики */
-}
