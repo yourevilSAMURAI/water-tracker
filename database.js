@@ -1,58 +1,42 @@
-const Database = require('better-sqlite3');
+const { createClient } = require('@libsql/client');
 
-// Создаем файл базы данных (если его нет, он появится автоматически)
-const db = new Database('water_tracker.db');
+// Создаем клиент. Ссылка и токен берутся из переменных окружения (настроим на Layero)
+const db = createClient({
+    url: process.env.TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN
+});
 
-// ==========================================
-// 1. СОЗДАНИЕ ТАБЛИЦ
-// ==========================================
+async function initDB() {
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                telegram_id TEXT UNIQUE NOT NULL,
+                daily_goal INTEGER DEFAULT 2000,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
 
-// Таблица пользователей
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    telegram_id TEXT UNIQUE NOT NULL,
-    daily_goal INTEGER DEFAULT 2000,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS water_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                amount INTEGER NOT NULL,
+                date TEXT NOT NULL,
+                time TEXT NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            )
+        `);
 
-// Таблица записей о воде
-db.exec(`
-  CREATE TABLE IF NOT EXISTS water_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    amount INTEGER NOT NULL,
-    date TEXT NOT NULL,
-    time TEXT NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES users(id)
-  )
-`);
+        await db.execute(`
+            CREATE INDEX IF NOT EXISTS idx_logs_user_date ON water_logs(user_id, date)
+        `);
 
-// ==========================================
-// 2. ИНДЕКСЫ (для ускорения поиска)
-// ==========================================
-
-db.exec(`
-  CREATE INDEX IF NOT EXISTS idx_logs_user_date 
-  ON water_logs(user_id, date)
-`);
-
-console.log('✅ База данных инициализирована.');
-
-// ==========================================
-// 3. СОЗДАНИЕ ТЕСТОВОГО ПОЛЬЗОВАТЕЛЯ
-// ==========================================
-
-const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
-
-if (userCount.count === 0) {
-  const insertUser = db.prepare(`
-    INSERT INTO users (id, telegram_id) 
-    VALUES (1, 'test_user_1')
-  `);
-  insertUser.run();
-  console.log('✅ Тестовый пользователь успешно создан.');
+        console.log('✅ База данных Turso инициализирована.');
+    } catch (error) {
+        console.error('❌ Ошибка инициализации БД:', error);
+    }
 }
 
-module.exports = db;
+// Экспортируем и клиент, и функцию инициализации
+module.exports = { db, initDB };
