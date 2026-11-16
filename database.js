@@ -1,6 +1,5 @@
 const { createClient } = require('@libsql/client');
 
-// Создаем клиент. Ссылка и токен берутся из переменных окружения (настроим на Layero)
 const db = createClient({
     url: process.env.TURSO_DATABASE_URL,
     authToken: process.env.TURSO_AUTH_TOKEN
@@ -24,7 +23,7 @@ async function initDB() {
                 amount INTEGER NOT NULL,
                 date TEXT NOT NULL,
                 time TEXT NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(id)
+                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         `);
 
@@ -34,9 +33,9 @@ async function initDB() {
 
         console.log('✅ База данных Turso инициализирована.');
     } catch (error) {
-        console.error('❌ Ошибка инициализации БД:', error);
+        console.error('❌ КРИТИЧЕСКАЯ Ошибка инициализации БД:', error);
+        throw error; // Останавливаем запуск сервера, если база не работает
     }
 }
 
-// Экспортируем и клиент, и функцию инициализации
 module.exports = { db, initDB };

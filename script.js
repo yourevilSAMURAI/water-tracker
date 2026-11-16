@@ -4,42 +4,44 @@
 const dailyGoal = 2000;
 const circumference = 2 * Math.PI * 88;
 let isJournalView = false;
-let db = {}; // Локальная копия данных с сервера
+let db = {}; 
+let isSending = false; // Защита от спама
 
-// Получение ID пользователя (Telegram или тестовый для браузера)
 const tg = window.Telegram?.WebApp;
 const currentUserId = (tg?.initDataUnsafe?.user) ? tg.initDataUnsafe.user.id : 1;
 
-// Инициализация Telegram WebApp
 if (tg) {
     tg.ready();
     tg.expand();
 }
-
 console.log(`ID пользователя: ${currentUserId} (${tg?.initDataUnsafe?.user ? 'Telegram' : 'Браузер'})`);
 
-// Управление датами
 let today = getToday();
 let activeDate = today;
-
-// Флаг для предотвращения повторных предупреждений
 let warningShownDate = localStorage.getItem('warningShownDate') || "";
 
-// DOM-элементы
 const circle = document.getElementById('progress-circle');
 const currentText = document.getElementById('current-amount');
 const undoBtn = document.getElementById('undo-btn');
 const factText = document.getElementById('fact-text');
 
+// Функция для безопасной передачи данных Телеграма на сервер
+function getHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    if (tg?.initData) {
+        headers['X-Telegram-Init-Data'] = tg.initData;
+    }
+    return headers;
+}
+
 // ==========================================================================
-// 2. API ЗАПРОСЫ (Взаимодействие с сервером)
+// 2. API ЗАПРОСЫ
 // ==========================================================================
 async function fetchHistoryFromServer() {
     try {
-        const response = await fetch(`/api/water?userId=${currentUserId}`);
+        const response = await fetch('/api/water', { headers: getHeaders() });
         const logs = await response.json();
         
-        // Преобразуем плоский массив от сервера в объект по датам
         const formattedData = {};
         logs.forEach(log => {
             if (!formattedData[log.date]) formattedData[log.date] = [];
@@ -53,68 +55,77 @@ async function fetchHistoryFromServer() {
     }
 }
 
+// Визуальная блокировка кнопок на время запроса
+function setLoadingState(isLoading) {
+    isSending = isLoading;
+    const buttons = document.querySelectorAll('.water-btn, .action-btn, .custom-input');
+    buttons.forEach(btn => {
+        if (isLoading) btn.style.opacity = '0.5';
+        else btn.style.opacity = '1';
+    });
+}
+
 function addWater(amount) {
+    if (isSending) return; 
+    setLoadingState(true);
+
     const now = new Date();
     const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    const dateString = getToday(); // <--- ИСПОЛЬЗУЕМ ЛОКАЛЬНУЮ ДАТУ
+    const dateString = getToday(); 
     
     fetch('/api/water', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            userId: currentUserId,
-            amount: amount,
-            date: dateString,
-            time: timeString
-        })
+        headers: getHeaders(),
+        body: JSON.stringify({ amount, date: dateString, time: timeString })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            console.log("✅ Успешно сохранено в БД! ID записи:", data.id);
-            
-            // Обновляем локальную копию для мгновенного отображения
+            console.log("✅ Сохранено! ID:", data.id);
             if (!db[activeDate]) db[activeDate] = [];
             db[activeDate].push({ id: data.id, amount: amount, time: timeString });
             updateUI();
-            
-            // Проверка на переизбыток
             checkOverLimit();
         } else {
-            console.error("Ошибка сервера:", data.error);
+            alert("Ошибка сервера: " + data.error);
         }
     })
-    .catch(error => console.error("Ошибка сети:", error));
+    .catch(error => {
+        console.error("Ошибка сети:", error);
+        alert("Нет связи с сервером. Проверьте интернет.");
+    })
+    .finally(() => setLoadingState(false));
 }
 
 function undoLast() {
+    if (isSending) return; 
     if (!db[activeDate] || db[activeDate].length === 0) return;
     
     const lastRecord = db[activeDate][db[activeDate].length - 1];
-    if (!lastRecord.id) {
-        alert("Ошибка: у записи нет ID. Обновите страницу.");
-        return;
-    }
+    if (!lastRecord.id) return alert("Обновите страницу");
 
-    fetch(`/api/water/${lastRecord.id}`, { method: 'DELETE' })
+    setLoadingState(true);
+
+    fetch(`/api/water/${lastRecord.id}`, { 
+        method: 'DELETE',
+        headers: getHeaders()
+    })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            console.log("🗑️ Запись успешно удалена из БД!");
+            console.log("🗑️ Удалено!");
             db[activeDate].pop(); 
             updateUI(); 
-        } else {
-            console.error("Не удалось удалить запись на сервере");
         }
     })
-    .catch(error => console.error("Ошибка сети:", error));
+    .catch(error => console.error("Ошибка сети:", error))
+    .finally(() => setLoadingState(false));
 }
 
 // ==========================================================================
 // 3. UI (Отрисовка интерфейса)
 // ==========================================================================
 function updateUI() {
-    // Проверка на смену дня
     const currentToday = getToday();
     if (currentToday !== today) {
         if (activeDate === today) activeDate = currentToday; 
@@ -167,7 +178,6 @@ function renderCalendar() {
     for (let i = 1; i <= daysInMonth; i++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
         
-        // Блокируем будущие дни
         if (dateStr > today) {
             const emptyDiv = document.createElement('div');
             emptyDiv.className = 'calendar-day disabled';
@@ -298,9 +308,26 @@ function closeModal(id) { document.getElementById(id).classList.remove('show'); 
 function openResetModal() { openModal('reset-modal'); }
 
 function executeReset() {
-    // В будущем здесь будет запрос к серверу на удаление всех данных
-    localStorage.removeItem('warningShownDate');
-    window.location.reload();
+    if (isSending) return;
+    setLoadingState(true);
+
+    fetch(`/api/water/all`, { 
+        method: 'DELETE',
+        headers: getHeaders()
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log("🗑️ Все данные удалены!");
+            localStorage.removeItem('warningShownDate');
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        console.error("Ошибка при сбросе:", error);
+        alert("Не удалось сбросить данные. Проверьте интернет.");
+    })
+    .finally(() => setLoadingState(false));
 }
 
 function addCustomWater() {
@@ -321,8 +348,6 @@ function addCustomWater() {
 // ==========================================================================
 // 5. ИНИЦИАЛИЗАЦИЯ И СОБЫТИЯ
 // ==========================================================================
-
-// Применяем сохраненную тему
 const savedTheme = localStorage.getItem('waterTheme');
 if (savedTheme === 'dark') {
     document.body.setAttribute('data-theme', 'dark');
@@ -330,7 +355,6 @@ if (savedTheme === 'dark') {
     document.getElementById('subtitle-text').textContent = 'Dark Wave Hydration System';
 }
 
-// Слушатели событий
 document.getElementById('custom-amount').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
         addCustomWater();
@@ -348,7 +372,6 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Автообновление при смене дня
 setInterval(() => {
     const currentToday = getToday();
     if (currentToday !== today) {
@@ -360,7 +383,6 @@ setInterval(() => {
     }
 }, 60000); 
 
-// Старт приложения
 async function startApp() {
     db = await fetchHistoryFromServer();
     updateUI();
